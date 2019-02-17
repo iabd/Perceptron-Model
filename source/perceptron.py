@@ -1,6 +1,6 @@
 # 
 #  Created by Abhinav Dwivedi on 25/01/2019.      
-#  Copyright © 2019 Abhinav Dwivedi. All rights reserved.                                                                                                                      
+#  Copyright © 2019 Abhinav Dwivedi. All rights reserved. 
 # 
 
 import pdb
@@ -8,7 +8,7 @@ import numpy as np
 from sklearn.base import BaseEstimator, ClassifierMixin
 
 class perceptron(BaseEstimator, ClassifierMixin):
-    def __init__(self, hiddenUnits, randomSeed, activation, weightInitialization, epochs, ETA, ALPHA, LAMBDA,loss="MEE", regression=False):
+    def __init__(self, hiddenUnits, randomSeed, activation, weightInitialization, epochs, ETA, ALPHA, LAMBDA, earlyStopping, tolerance=1e-3, patience=None,loss="MEE", regression=False):
         self.ETA = ETA
         self.ALPHA = ALPHA
         self.LAMBDA = LAMBDA
@@ -20,15 +20,22 @@ class perceptron(BaseEstimator, ClassifierMixin):
         self.labelThreshold = 0.5
         self.epochs = epochs
         self.randomSeed=randomSeed
+        self.earlyStopping=earlyStopping
         self.validationAccuracies="The model is NOT trained with validation"
         self.validationLosses="The model is NOT trained with validation"
+        if self.earlyStopping:
+            assert patience is not None, "Please provide the 'patience' as number of deterioration epochs."
+            self.tolerance=tolerance
+            self.patience=patience
+        else:
+            self.patience=None
+            self.tolerance=None
+        assert self.activation in ['sigm', 'relu', 'tanh'], "This model only supports 'sigm' as sigmoid, 'relu' as rectified linear units, and 'tanh' as hyperbolic tangent as activation functions."
+        assert self.weightInitialization in ['xav', 'zero', 'he', 'type1'], "This model supports 'xav' (as xavier initialization), 'he' (he normal initialization), 'zero' and 'type1' initialization types'."
 
-         
-    #@property
     def createModel(self):
         """Returns the structure of the network in form of a dict."""
         np.random.seed(self.randomSeed)    
-    # thanks to https://medium.com/usf-msds/deep-learning-best-practices-1-weight-initialization-14e5c0295b94
         if self.weightInitialization=='xav':
             return{
                 'Wih':np.random.randn(self.inputUnits,self.hiddenUnits)*np.sqrt(1/self.hiddenUnits),
@@ -43,14 +50,14 @@ class perceptron(BaseEstimator, ClassifierMixin):
                 'bi':np.zeros((1,self.hiddenUnits)),
                 'bh':np.zeros((1,self.outputUnits))
             }
-        elif self.weightInitialization=='type1':
+        elif self.weightInitialization=='he':
             return{
                 'Wih':np.random.randn(self.inputUnits,self.hiddenUnits)*np.sqrt(2/self.hiddenUnits),
                 'Who':np.random.randn(self.hiddenUnits,self.outputUnits)*np.sqrt(2/self.hiddenUnits),
                 'bi':np.random.randn(1,self.hiddenUnits),
                 'bh':np.random.randn(1,self.outputUnits)
             }
-        elif self.weightInitialization=='type2':
+        elif self.weightInitialization=='type1':
             return{
                 'Wih':np.random.randn(self.inputUnits,self.hiddenUnits)*np.sqrt(2/(self.hiddenUnits+self.inputUnits)),
                 'Who':np.random.randn(self.hiddenUnits,self.outputUnits)*np.sqrt(2/(self.hiddenUnits+self.outputUnits)),
@@ -142,7 +149,6 @@ returns the loss. Two loss functions are available. Specifiy the parameter 'loss
         return deltaOutput_, deltaHidden_
     
     def updateWeights(self, dataMatrix, hh_, deltaOutput_, deltaHidden_, prevDeltaWho_, prevDeltaWih_):
-        """update the weights"""
         deltaWho_ = hh_.T.dot(deltaOutput_) * self.ETA   
         otherUpdatesWho = self.ETA * self.model['Who'] * (-self.LAMBDA) + self.ALPHA * prevDeltaWho_ #learningrate factor - regularization facor + momentum factor
         deltaWih_ = dataMatrix.T.dot(deltaHidden_) * self.ETA
@@ -150,7 +156,7 @@ returns the loss. Two loss functions are available. Specifiy the parameter 'loss
         if self.regression:
             deltaWho_=deltaWho_/dataMatrix.shape[0]
             deltaWih_ = deltaWih_ / dataMatrix.shape[0]
-        #time for updates
+        
         self.model['Who'] += deltaWho_ + otherUpdatesWho
         self.model['Wih'] += deltaWih_ + otherUpdatesWih
         self.model['bh'] += np.sum(deltaOutput_, axis=0, keepdims=True) * self.ETA
@@ -179,7 +185,7 @@ returns the loss. Two loss functions are available. Specifiy the parameter 'loss
             return self.ceilAndFloor(result)
     
 
-    def fit(self, features, labels, validationFeatures=None, validationLabels=None, realTimePlotting=False):
+    def fit(self, features, labels, validationFeatures=None, validationLabels=None, realTimePlotting=False, earlyStoppingLog=True, comingFromGridSearch=False):
         """train/fit"""
         self.inputUnits = features.shape[1]
         self.outputUnits = labels.shape[1]
@@ -191,9 +197,10 @@ returns the loss. Two loss functions are available. Specifiy the parameter 'loss
             self.validationLosses=[]
         deltaWho = 0
         deltaWih = 0
+        patience=self.patience
         for iteration in range(self.epochs):
             print("iteration {}/{}".format(iteration + 1, self.epochs), end="\r")
-            hh, oo = self.forwardProp(features)  #results of hidden layer and output layer after forward propagation)
+            hh, oo = self.forwardProp(features)
             deltaOutput, deltaHidden = self.backProp(labels, hh, oo)
             prevDeltaWih = deltaWih
             prevDeltaWho = deltaWho
@@ -210,3 +217,18 @@ returns the loss. Two loss functions are available. Specifiy the parameter 'loss
                 self.validationLosses.append(self.scoreTraining(validationLabels, validationResults, loss=True))
                 if not self.regression:
                     self.validationAccuracies.append(self.scoreTraining(validationLabels, validationResults, acc=True))
+            if self.earlyStopping:
+                if iteration>0:
+                    if comingFromGridSearch:self.newEpochNotification=False
+                    lossDecrement=(self.losses[iteration-1]-self.losses[iteration])/self.losses[iteration-1]
+                    if lossDecrement<self.tolerance:
+                        patience-=1
+                        if patience==0:
+                            if earlyStoppingLog:       #researcher mode ;D
+                                print("The algorithm has run out of patience. \nFinishing due to early stopping on epoch {}. \n PS. Try decreasing 'tolerance' or increasing 'patience'".format(iteration))
+                            self.newEpochNotification=True
+                            self.bestEpoch=iteration
+                            break
+                    else:
+                        patience=self.patience
+                            

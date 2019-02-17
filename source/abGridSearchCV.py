@@ -37,11 +37,13 @@ def abGridSearchCV(defaultParams, paramGrid, features, labels, validationSplit, 
         param={}
         for index_ in range(len(paramGrid)):
             param[list(paramGrid.keys())[index_]]=val[index_]
-        regressionModel=perceptron(**defaultParams)
-        regressionModel.set_params(**param)
-        regressionModel.fit(trainData_, trainLabels_, validationData_, validationLabels_)
-        meanLoss=np.mean(regressionModel.losses)
-        meanValidationLoss=np.mean(regressionModel.validationLosses)
+        model=perceptron(**defaultParams)
+        model.set_params(**param)
+        model.fit(trainData_, trainLabels_, validationData_, validationLabels_, earlyStoppingLog=False, comingFromGridSearch=True)
+        meanLoss=np.mean(model.losses)
+        meanValidationLoss=np.mean(model.validationLosses)
+        if model.newEpochNotification:
+            param['epochs']=model.bestEpoch
         tempLog={
             'params': param, 
             'meanTrainingLoss':meanLoss, 
@@ -57,7 +59,7 @@ def abGridSearchCV(defaultParams, paramGrid, features, labels, validationSplit, 
             winners = sorted(winners, key=lambda k: k[winnerCriteria])
             if tempLog[winnerCriteria]<winners[-1][winnerCriteria]:
                 winners[-1]=tempLog
-            
+        
     if log:
         return logToBeReturned, winners
     else:
