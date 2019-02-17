@@ -6,4 +6,4 @@ This project was submitted as a part of semester credits in 'Machine Learning by
 The playground.ipynb notebook shows the demonstration and test on Monks Datasets.
 
 
-##Update : Early stopping support.
+## Update : Early stopping support.
