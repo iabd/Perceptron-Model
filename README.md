@@ -238,7 +238,7 @@ plt.plot(x.losses)
 
 
 
-![png](output_19_1.png)
+![png](img/output_19_1.png)
 
 
 
@@ -254,7 +254,7 @@ plt.plot(x.accuracies)
 
 
 
-![png](output_20_1.png)
+![png](img/output_20_1.png)
 
 
 
@@ -299,7 +299,7 @@ plt.plot(x.losses)
 
 
 
-![png](output_25_1.png)
+![png](img/output_25_1.png)
 
 
 
@@ -315,7 +315,7 @@ plt.plot(x.accuracies)
 
 
 
-![png](output_26_1.png)
+![png](img/output_26_1.png)
 
 
 <a id='monk1test'></a>
@@ -375,7 +375,7 @@ plt.plot(x.validationAccuracies)
 
 
 
-![png](output_34_1.png)
+![png](img/output_34_1.png)
 
 
 
@@ -392,7 +392,7 @@ plt.plot(x.validationLosses)
 
 
 
-![png](output_35_1.png)
+![png](img/output_35_1.png)
 
 
 <a id='monk2'></a>
@@ -501,7 +501,7 @@ plt.plot(x.accuracies)
 
 
 
-![png](output_44_1.png)
+![png](img/output_44_1.png)
 
 
 
@@ -517,7 +517,7 @@ plt.plot(x.losses)
 
 
 
-![png](output_45_1.png)
+![png](img/output_45_1.png)
 
 
 <a id='monk2test'></a>
@@ -589,7 +589,7 @@ plt.plot(x.validationAccuracies)
 
 
 
-![png](output_53_1.png)
+![png](img/output_53_1.png)
 
 
 
@@ -606,7 +606,7 @@ plt.plot(x.validationLosses)
 
 
 
-![png](output_54_1.png)
+![png](img/output_54_1.png)
 
 
 <a id='monk3'></a>
@@ -715,7 +715,7 @@ plt.plot(x.accuracies)
 
 
 
-![png](output_63_1.png)
+![png](img/output_63_1.png)
 
 
 
@@ -731,7 +731,7 @@ plt.plot(x.losses)
 
 
 
-![png](output_64_1.png)
+![png](img/output_64_1.png)
 
 
 <a id='monk3test'></a>
@@ -783,7 +783,7 @@ plt.plot(x.validationAccuracies)
 
 
 
-![png](output_70_1.png)
+![png](img/output_70_1.png)
 
 
 
@@ -800,7 +800,7 @@ plt.plot(x.validationLosses)
 
 
 
-![png](output_71_1.png)
+![png](img/output_71_1.png)
 
 
 <a id='mlcup'></a>
@@ -1025,7 +1025,7 @@ plt.plot(x.losses)
 
 
 
-![png](output_90_1.png)
+![png](img/output_90_1.png)
 
 
 
@@ -1064,7 +1064,7 @@ plt.scatter(xxx,yyy, alpha= 0.5, s = 2, marker='^')
 
 
 
-![png](output_94_1.png)
+![png](img/output_94_1.png)
 
 
 <a id='mlcupcv'></a>
@@ -1093,7 +1093,7 @@ plt.plot(x.validationLosses)
 
 
 
-![png](output_97_1.png)
+![png](img/output_97_1.png)
 
 
 <a id='blindtest'></a>
@@ -1122,7 +1122,7 @@ plt.scatter(xxx,yyy, alpha= 0.5, s = 2)
 
 
 
-![png](output_101_1.png)
+![png](img/output_101_1.png)
 
 
 
@@ -1148,7 +1148,7 @@ plt.plot(regressionModel.losses)
 
 
 
-![png](output_103_1.png)
+![png](img/output_103_1.png)
 
 
 
@@ -1172,5 +1172,5 @@ plt.scatter(xxx,yyy, alpha= 0.5, s = 2)
 
 
 
-![png](output_105_1.png)
+![png](img/output_105_1.png)
 
